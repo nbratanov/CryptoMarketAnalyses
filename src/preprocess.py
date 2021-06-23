@@ -1,10 +1,9 @@
 import csv
-import re
 from datetime import timedelta
 
 import pandas as pd
 
-from src.utils.constants import Constants
+from src.common.utils import Utils
 
 
 def csv_writer(path='../data/', outfile='clearedPosts', columns=''):
@@ -15,49 +14,12 @@ def csv_writer(path='../data/', outfile='clearedPosts', columns=''):
     return writer
 
 
-def get_cleaned_text(text, should_remove_signs):
-    # Remove Unicode
-    cleaned_text = re.sub(r'[^\x00-\x7F]+', ' ', text)
-    # Remove Mentions
-    cleaned_text = re.sub(r'@\w+', '', cleaned_text)
-    # Remove the numbers
-    # cleaned_text = re.sub(r'[0-9]', '', cleaned_text)
-    # Remove the doubled space
-    cleaned_text = re.sub(r'\s{2,}', ' ', cleaned_text)
-    # Remove the doubled comma
-    cleaned_text = re.sub(r',{2,}', ', ', cleaned_text)
-    # Remove newlines and bad escape symbols
-    cleaned_text = re.sub(r'\\u.{4}', '', cleaned_text)
-    cleaned_text = re.sub(r'\\n', '', cleaned_text)
-    # Remove unnecessary plus symbols
-    cleaned_text = re.sub(r'\+', '', cleaned_text)
-    cleaned_text = re.sub(r'#', '', cleaned_text)
-    cleaned_text = re.sub(r'\(', '', cleaned_text)
-    cleaned_text = re.sub(r'\)', '', cleaned_text)
-    cleaned_text = re.sub(r':', '', cleaned_text)
-    cleaned_text = re.sub(r';', '', cleaned_text)
-    cleaned_text = re.sub(r'_', '', cleaned_text)
-    cleaned_text = re.sub(r'\\', ' ', cleaned_text)
-    cleaned_text = re.sub(r'-', ' ', cleaned_text)
-    cleaned_text = re.sub(r'/', ' ', cleaned_text)
-    cleaned_text = re.sub(r'\'', '', cleaned_text)
-    cleaned_text = re.sub(r'\"', '', cleaned_text)
-    cleaned_text = re.sub(r'\.([A-Za-z]{1})', r'. \1', cleaned_text)
-
-    if should_remove_signs:
-        cleaned_text = re.sub(r'\?', ' ', cleaned_text)
-        cleaned_text = re.sub(r'\.', ' ', cleaned_text)
-        cleaned_text = re.sub(r'!', ' ', cleaned_text)
-
-    return cleaned_text
-
-
 def get_processed_posts(posts):
     for i, row in posts.iterrows():
         current_message = row['message']
 
         if current_message is not None and type(current_message) == str:
-            cleared_message = get_cleaned_text(current_message, False)
+            cleared_message = Utils.clean_text(current_message, False)
             row['message'] = cleared_message
         else:
             posts.drop(labels=[i], axis=0)
@@ -121,11 +83,11 @@ def get_posts(coin_info, group_message_path, coin_names):
 
 def generate_crypto_coin_model(coin_info_path, result_path):
     coin_info = pd.read_csv(coin_info_path)
-    binance_data = get_posts(coin_info, '../data/groupMessages/group_messages_binance.json', Constants.BITCOIN_NAMES)
-    bittrex_data = get_posts(coin_info, '../data/groupMessages/group_messages_bittrex.json', Constants.BITCOIN_NAMES)
-    huobi_data = get_posts(coin_info, '../data/groupMessages/group_messages_huobi.json', Constants.BITCOIN_NAMES)
-    kucoin_data = get_posts(coin_info, '../data/groupMessages/group_messages_kucoin.json', Constants.BITCOIN_NAMES)
-    okex_data = get_posts(coin_info, '../data/groupMessages/group_messages_okex.json', Constants.BITCOIN_NAMES)
+    binance_data = get_posts(coin_info, '../data/groupMessages/group_messages_binance.json', Utils.BITCOIN_NAMES)
+    bittrex_data = get_posts(coin_info, '../data/groupMessages/group_messages_bittrex.json', Utils.BITCOIN_NAMES)
+    huobi_data = get_posts(coin_info, '../data/groupMessages/group_messages_huobi.json', Utils.BITCOIN_NAMES)
+    kucoin_data = get_posts(coin_info, '../data/groupMessages/group_messages_kucoin.json', Utils.BITCOIN_NAMES)
+    okex_data = get_posts(coin_info, '../data/groupMessages/group_messages_okex.json', Utils.BITCOIN_NAMES)
 
     data = pd.concat([binance_data, bittrex_data, huobi_data, kucoin_data, okex_data])
     data.to_csv(result_path)
