@@ -1,9 +1,12 @@
 from preprocess import generate_crypto_coin_model
+from src.common.utils import Utils
 from time_series_predictions import predict
-from classification.multinomial_naive_bayes import test_classification
+from classification.multinomial_naive_bayes import test_classification, test_classification_predictions
 
 if __name__ == '__main__':
-    # generate_crypto_coin_model('../data/cryptoInfo/coin_Bitcoin.csv', '../data/mergedData.csv')
+    # generate_crypto_coin_model('../data/cryptoInfo/coin_Bitcoin.csv', '../data/mergedData.csv', Utils.BITCOIN_NAMES)
+    generate_crypto_coin_model('../data/cryptoInfo/coin_Ethereum.csv', '../data/ethereum-data.csv', Utils.ETHEREUM_NAMES)
+    generate_crypto_coin_model('../data/cryptoInfo/coin_Bitcoin.csv', '../data/bitcoin-data.csv', Utils.ETHEREUM_NAMES)
 
     # column_to_predict = 'Close'
     # predict('../data/cryptoInfo/coin_Bitcoin.csv', column_to_predict, 0.2)
@@ -20,6 +23,7 @@ if __name__ == '__main__':
     # print(np.mean(dataset['movement_the_day_after']))
     # print(np.min(dataset['movement_the_day_after']))
 
-    test_classification('../data/mergedData.csv')
+    # test_classification('../data/mergedData.csv')
+    # test_classification_predictions('../data/mergedData-boyan.csv')
 
 

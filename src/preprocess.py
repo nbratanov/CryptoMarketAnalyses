@@ -81,13 +81,13 @@ def get_posts(coin_info, group_message_path, coin_names):
     return merge_posts_with_coin_info(coin_info, filtered_posts)
 
 
-def generate_crypto_coin_model(coin_info_path, result_path):
+def generate_crypto_coin_model(coin_info_path, result_path, coin_names):
     coin_info = pd.read_csv(coin_info_path)
-    binance_data = get_posts(coin_info, '../data/groupMessages/group_messages_binance.json', Utils.BITCOIN_NAMES)
-    bittrex_data = get_posts(coin_info, '../data/groupMessages/group_messages_bittrex.json', Utils.BITCOIN_NAMES)
-    huobi_data = get_posts(coin_info, '../data/groupMessages/group_messages_huobi.json', Utils.BITCOIN_NAMES)
-    kucoin_data = get_posts(coin_info, '../data/groupMessages/group_messages_kucoin.json', Utils.BITCOIN_NAMES)
-    okex_data = get_posts(coin_info, '../data/groupMessages/group_messages_okex.json', Utils.BITCOIN_NAMES)
+    binance_data = get_posts(coin_info, '../data/groupMessages/group_messages_binance.json', coin_names)
+    bittrex_data = get_posts(coin_info, '../data/groupMessages/group_messages_bittrex.json', coin_names)
+    huobi_data = get_posts(coin_info, '../data/groupMessages/group_messages_huobi.json', coin_names)
+    kucoin_data = get_posts(coin_info, '../data/groupMessages/group_messages_kucoin.json', coin_names)
+    okex_data = get_posts(coin_info, '../data/groupMessages/group_messages_okex.json', coin_names)
 
     data = pd.concat([binance_data, bittrex_data, huobi_data, kucoin_data, okex_data])
     data.to_csv(result_path)

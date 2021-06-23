@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 
 class Utils:
     BITCOIN_NAMES = ['BTC', 'btc', 'Btc', 'Bitcoin', 'bitcoin', 'bit']
+    ETHEREUM_NAMES = ['ETH', 'eth', 'Eth', 'Ethereum', 'ETHEREUM', 'ethereum', 'ETHEREU']
 
     @staticmethod
     def clean_text(text, should_remove_signs):
@@ -61,7 +62,7 @@ class Utils:
                 # normalized_word = stemmer.stem(lemmatized_word.lower())
                 normalized_word = stemmer.stem(word.lower())
                 normalized_text += normalized_word + (" " if i < len(tokenized_text) else "")
-            i = i + 1
+            i += 1
 
         return normalized_text
 
