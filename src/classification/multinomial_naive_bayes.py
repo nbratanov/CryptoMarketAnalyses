@@ -1,11 +1,10 @@
+from datetime import datetime
+
 import nltk
 import numpy as np
 import pandas as pd
-from nltk import PorterStemmer
 
 from src.common.utils import Utils
-
-stemmer = PorterStemmer()
 
 
 def build_classified_data(data):
@@ -63,8 +62,7 @@ def classify_unique_words(training_data):
 def calculate_class_score(message, class_words, class_name):
     score = 0
     for word in nltk.word_tokenize(message):
-        stemmed_word = stemmer.stem(word.lower())
-        if stemmed_word in class_words[class_name]:
+        if word in class_words[class_name]:
             score += 1
     return score
 
@@ -79,12 +77,10 @@ def find_highest_class_score(message, class_words):
 def calculate_class_score_commonality(message, class_words, corpus_words, class_name, show_details=False):
     score = 1
     for word in nltk.word_tokenize(message):
-        stemmed_word = stemmer.stem(word.lower())
-        if stemmed_word in class_words[class_name]:
-            score *= class_words[class_name].count(stemmed_word) / corpus_words[stemmed_word]
+        if word in class_words[class_name]:
+            score *= class_words[class_name].count(word) / corpus_words[word]
             if show_details:
-                print("   match: " + stemmed_word + "(" + str(
-                    class_words[class_name].count(word) / corpus_words[stemmed_word]) + ")")
+                print("   match: " + word + "(" + str(class_words[class_name].count(word) / corpus_words[word]) + ")")
         else:
             score *= 0.001
     return score
@@ -117,7 +113,10 @@ def split_data(data, test_size):
 
 def train_model(data_path, test_size_percentage):
     data = pd.read_csv(data_path)
+    classifying_data_time = datetime.now()
+    print("Beginning classifying data: " + str(classifying_data_time))
     classified_data = build_classified_data(data)
+    print("End of classifying data: " + str(datetime.now() - classifying_data_time))
     test_size = int(len(data) * test_size_percentage)
     train_data, test_data = split_data(classified_data, test_size)
 
@@ -125,7 +124,7 @@ def train_model(data_path, test_size_percentage):
 
     successful_predictions = 0
     for data in test_data:
-        predicted_class, predicted_score = classify(data['message'], class_words, corpus_words, True)
+        predicted_class, predicted_score = classify(data['message'], class_words, corpus_words)
         if data['class'] == predicted_class:
             successful_predictions += 1
 
@@ -159,4 +158,8 @@ def test_classification(data_path):
 
 
 def test_classification_predictions(data_path):
-    train_model(data_path, 0.05)
+    begin_time = datetime.now()
+    print("Start time: " + str(begin_time))
+    train_model(data_path, 0.1)
+    print("Time needed to train the model: ")
+    print(datetime.now() - begin_time)

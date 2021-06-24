@@ -19,7 +19,7 @@ def prepare_data(dataframe, column_to_predict, number_of_predictions, test_size)
     label.dropna(inplace=True)
     y = np.array(label)
 
-    x_train, x_test, y_train, y_test = model_selection.train_test_split(x, y, test_size=test_size)
+    x_train, x_test, y_train, y_test = model_selection.train_test_split(x, y, shuffle=False, test_size=number_of_predictions)
     return [x_train, x_test, y_train, y_test, x_lately]
 
 
@@ -42,17 +42,27 @@ def predict(coin_information_path, column_to_predict, test_percentage):
         learner.fit(x_train, y_train)
         score = learner.score(x_test, y_test)
         predictions = learner.predict(x_lately)
+
+        accuracy = calculate_average_accuracy(predictions, y_test)
         print("Score of '" + model[0] + "' based on prediction is: " + str(score))
+        print("Accuracy is: " + str(accuracy) + "%")
 
         visualize(dataframe, predictions, number_of_predictions, column_to_predict)
 
 
-def visualize(dataframe, forecast, number_of_forecasts, column_to_predict):
+def calculate_average_accuracy(predicted_data, test_data):
+    accuracy_sum = 0
+    for i in range(len(test_data)):
+        accuracy_sum += (100 * (float(predicted_data[i]) / float(test_data[i])))
+    return accuracy_sum / len(test_data)
+
+
+def visualize(dataframe, predictions, number_of_predictions, column_to_predict):
     dataframe['Date'] = pd.to_datetime(dataframe['Date'])
     plt.figure()
     plt.plot(dataframe['Date'], dataframe[column_to_predict])
-    last = dataframe['Date'].iloc[-number_of_forecasts:]
-    plt.plot(last, forecast)
+    last = dataframe['Date'].iloc[-number_of_predictions:]
+    plt.plot(last, predictions)
     plt.xlabel('Date')
     plt.ylabel(column_to_predict)
     plt.show()
