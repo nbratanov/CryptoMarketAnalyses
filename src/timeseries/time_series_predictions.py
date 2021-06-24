@@ -9,7 +9,7 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 
 
-def prepare_data(dataframe, column_to_predict, number_of_predictions, test_size):
+def prepare_data(dataframe, column_to_predict, number_of_predictions):
     x = np.array(dataframe[[column_to_predict]])
     x = preprocessing.scale(x)
     x_lately = x[-number_of_predictions:]
@@ -19,15 +19,15 @@ def prepare_data(dataframe, column_to_predict, number_of_predictions, test_size)
     label.dropna(inplace=True)
     y = np.array(label)
 
-    x_train, x_test, y_train, y_test = model_selection.train_test_split(x, y, shuffle=False, test_size=number_of_predictions)
+    x_train, x_test, y_train, y_test = model_selection.train_test_split(x, y, shuffle=False,
+                                                                        test_size=number_of_predictions)
     return [x_train, x_test, y_train, y_test, x_lately]
 
 
 def predict(coin_information_path, column_to_predict, test_percentage):
     dataframe = pd.read_csv(coin_information_path)
     number_of_predictions = int(len(dataframe) * test_percentage)
-    x_train, x_test, y_train, y_test, x_lately = prepare_data(dataframe, column_to_predict, number_of_predictions,
-                                                              test_percentage)
+    x_train, x_test, y_train, y_test, x_lately = prepare_data(dataframe, column_to_predict, number_of_predictions)
 
     # Try out different models suitable for time series forecasting
     models = [

@@ -1,17 +1,8 @@
-import csv
 from datetime import timedelta
 
 import pandas as pd
 
 from src.common.utils import Utils
-
-
-def csv_writer(path='../data/', outfile='clearedPosts', columns=''):
-    target_file = open(path + outfile + '.csv', mode='w', encoding='utf-8', newline='\n')
-    writer = csv.writer(target_file, quoting=csv.QUOTE_MINIMAL)
-    writer.writerow(columns)
-
-    return writer
 
 
 def get_processed_posts(posts):
@@ -83,11 +74,11 @@ def get_posts(coin_info, group_message_path, coin_names):
 
 def generate_crypto_coin_model(coin_info_path, result_path, coin_names):
     coin_info = pd.read_csv(coin_info_path)
-    binance_data = get_posts(coin_info, '../data/groupMessages/group_messages_binance.json', coin_names)
-    bittrex_data = get_posts(coin_info, '../data/groupMessages/group_messages_bittrex.json', coin_names)
-    huobi_data = get_posts(coin_info, '../data/groupMessages/group_messages_huobi.json', coin_names)
-    kucoin_data = get_posts(coin_info, '../data/groupMessages/group_messages_kucoin.json', coin_names)
-    okex_data = get_posts(coin_info, '../data/groupMessages/group_messages_okex.json', coin_names)
+    binance_data = get_posts(coin_info, '../../data/groupMessages/group_messages_binance.json', coin_names)
+    bittrex_data = get_posts(coin_info, '../../data/groupMessages/group_messages_bittrex.json', coin_names)
+    huobi_data = get_posts(coin_info, '../../data/groupMessages/group_messages_huobi.json', coin_names)
+    kucoin_data = get_posts(coin_info, '../../data/groupMessages/group_messages_kucoin.json', coin_names)
+    okex_data = get_posts(coin_info, '../../data/groupMessages/group_messages_okex.json', coin_names)
 
     data = pd.concat([binance_data, bittrex_data, huobi_data, kucoin_data, okex_data])
     data.to_csv(result_path)

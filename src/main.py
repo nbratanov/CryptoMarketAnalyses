@@ -1,7 +1,4 @@
-from preprocess import generate_crypto_coin_model
-from src.common.utils import Utils
-from time_series_predictions import predict
-from classification.multinomial_naive_bayes import test_classification, test_classification_predictions
+from src.timeseries.time_series_predictions import predict
 
 if __name__ == '__main__':
     # generate_crypto_coin_model('../data/cryptoInfo/coin_Bitcoin.csv', '../data/mergedData.csv', Utils.BITCOIN_NAMES)
