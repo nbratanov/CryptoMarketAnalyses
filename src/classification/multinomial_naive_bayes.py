@@ -1,4 +1,7 @@
+import math
 from datetime import datetime
+from decimal import Decimal
+from typing import re
 
 import nltk
 import numpy as np
@@ -14,7 +17,7 @@ def build_classified_data(data):
     message = np.array(normalized_data['message'])
     price_increase = []
     for i in range(len(normalized_data)):
-        increase = 100 * float(normalized_data.loc[i, 'movement_the_day_after']) / float(normalized_data.loc[i, 'Open'])
+        increase = 100 * float(normalized_data.loc[i, 'movement_the_day_after']) / float(normalized_data.loc[i, 'Close'])
         price_increase.append(increase)
     print("Collected evaluating the percentage of price increase in a day")
 
@@ -75,14 +78,18 @@ def find_highest_class_score(message, class_words):
 
 # Calculates the score of a message based both number of occurrences of a word in a class and the word commonality
 def calculate_class_score_commonality(message, class_words, corpus_words, class_name, show_details=False):
-    score = 1
-    for word in nltk.word_tokenize(message):
+    tokenized_message = nltk.word_tokenize(message)
+    score = Decimal(math.factorial(len(tokenized_message)))
+
+    for word in tokenized_message:
         if word in class_words[class_name]:
-            score *= class_words[class_name].count(word) / corpus_words[word]
+            probability = Decimal(math.pow(class_words[class_name].count(word) / corpus_words[word],
+                                           message.count(word)) / math.factorial(message.count(word)))
+            score *= probability
             if show_details:
                 print("   match: " + word + "(" + str(class_words[class_name].count(word) / corpus_words[word]) + ")")
         else:
-            score *= 0.001
+            score *= Decimal(0.001)
     return score
 
 
@@ -123,10 +130,13 @@ def train_model(data_path, test_size_percentage):
     class_words, corpus_words = classify_unique_words(train_data)
 
     successful_predictions = 0
+    counter = 0;
     for data in test_data:
         predicted_class, predicted_score = classify(data['message'], class_words, corpus_words)
         if data['class'] == predicted_class:
             successful_predictions += 1
+        # print("Progress: post number -> " + str(counter))
+        counter += 1
 
     print("The size of the test data: " + str(test_size))
     print("Amount of successful predictions: " + str(successful_predictions))
