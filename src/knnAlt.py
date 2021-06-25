@@ -14,18 +14,29 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pandas as pd
 from nltk.tokenize import word_tokenize
-from nltk.stem.porter import PorterStemmer
-from nltk.stem import SnowballStemmer
-from nltk.stem.lancaster import LancasterStemmer
-
-from sklearn.metrics import roc_auc_score
 
 dataset = pd.read_csv('../data/knnInput.csv')
 print(np.max(dataset['movement_the_day_after']))
 print(np.mean(dataset['movement_the_day_after']))
 print(np.min(dataset['movement_the_day_after']))
 dataset['output'] = round(dataset['movement_the_day_after'] / 1000)
-print(dataset.head(1000)['output'])
+#dataset = dataset.sample(frac=1).reset_index(drop=True)
+
+def get_class(percent):
+    result = 0
+    if percent >= -1 and percent <= 1:
+        result = 'neutral'
+    elif percent > 1 and percent <= 4:
+        result = 'profit'
+    elif percent > 4:
+        result = 'huge_profit'
+    elif percent < -1 and percent >= -4:
+        result = 'loss'
+    elif percent < -4:
+        result = 'huge_loss'
+
+    return result
+
 
 class KNN_NLC_Classifer():
     def __init__(self, k = 1, distance_type = 'path'):
@@ -40,42 +51,38 @@ class KNN_NLC_Classifer():
         self.y_train = y_train
 
     def document_similarity(self, doc1, doc2):
-        """Finds the symmetrical similarity between doc1 and doc2"""
-
         synsets1 = self.doc_to_synsets(doc1)
         synsets2 = self.doc_to_synsets(doc2)
 
         return (self.similarity_score(synsets1, synsets2) + self.similarity_score(synsets2, synsets1)) / 2
-
-
-    def cosine_sim(self, text1, text2):
-        tfidf = self.vectorizer.fit_transform([text1, text2])
-        return ((tfidf * tfidf.T).A)[0, 1]
 
     # This function runs the K(1) nearest neighbour algorithm and
     # returns the label with closest match.
     def predict(self, x_test):
         self.x_test = x_test
         y_predict = []
-
+        count_correct = 0
         for i in range(len(x_test)):
             tic = time.perf_counter()
 
             max_sim = 0
             max_index = 0
             for j in range(self.x_train.shape[0]):
-                temp = self.document_similarity(x_test[i + train_size + 1], self.x_train[j])
+                temp = self.document_similarity(x_test[i + train_size +1], self.x_train[j])
                 if temp > max_sim:
                     max_sim = temp
                     max_index = j
             y_predict.append(self.y_train[max_index])
-            print(self.y_train[max_index] == test_corpus.loc[i + train_size + 1, 'output'])
+            print(self.y_train[max_index] == test_corpus.loc[i + train_size+1, 'output'])
+            if self.y_train[max_index] == test_corpus.loc[i + train_size+1, 'output']:
+                count_correct += 1
             toc = time.perf_counter()
-            print(f"This is how much we are fucked {toc - tic:0.4f} seconds")
+            print(f"This is how it takes {toc - tic:0.4f} seconds")
+            print(f'{count_correct}/{i}')
+
         return y_predict
 
     def convert_tag(self, tag):
-        """Convert the tag given by nltk.pos_tag to the tag used by wordnet.synsets"""
         tag_dict = {'N': 'n', 'J': 'a', 'R': 'r', 'V': 'v'}
         try:
             return tag_dict[tag[0]]
@@ -83,16 +90,6 @@ class KNN_NLC_Classifer():
             return None
 
     def doc_to_synsets(self, doc):
-        """
-            Returns a list of synsets in document.
-            Tokenizes and tags the words in the document doc.
-            Then finds the first synset for each word/tag combination.
-        If a synset is not found for that combination it is skipped.
-        Args:
-            doc: string to be converted
-        Returns:
-            list of synsets
-        """
         tokens = word_tokenize(doc + ' ')
 
         l = []
@@ -106,16 +103,6 @@ class KNN_NLC_Classifer():
         return l
 
     def similarity_score(self, s1, s2, distance_type='path'):
-        """
-        Calculate the normalized similarity score of s1 onto s2
-        For each synset in s1, finds the synset in s2 with the largest similarity value.
-        Sum of all of the largest similarity values and normalize this value by dividing it by the
-        number of largest similarity values found.
-        Args:
-            s1, s2: list of synsets from doc_to_synsets
-        Returns:
-            normalized similarity score of s1 onto s2
-        """
         s1_largest_scores = []
 
         for i, s1_synset in enumerate(s1, 0):
@@ -136,8 +123,8 @@ class KNN_NLC_Classifer():
 
         return mean_score
 
-train_size = int(0.995 * len(dataset))
-test_size = int(0.005 * len(dataset))
+train_size = int(0.999 * len(dataset))
+test_size = int(0.001 * len(dataset))
 print(test_size)
 
 train_corpus = dataset[:train_size]
