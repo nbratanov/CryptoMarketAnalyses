@@ -1,7 +1,6 @@
 import math
 from datetime import datetime
 from decimal import Decimal
-from typing import re
 
 import nltk
 import numpy as np
@@ -130,13 +129,10 @@ def train_model(data_path, test_size_percentage):
     class_words, corpus_words = classify_unique_words(train_data)
 
     successful_predictions = 0
-    counter = 0;
     for data in test_data:
         predicted_class, predicted_score = classify(data['message'], class_words, corpus_words)
         if data['class'] == predicted_class:
             successful_predictions += 1
-        # print("Progress: post number -> " + str(counter))
-        counter += 1
 
     print("The size of the test data: " + str(test_size))
     print("Amount of successful predictions: " + str(successful_predictions))
