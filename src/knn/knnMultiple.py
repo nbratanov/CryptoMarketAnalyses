@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pandas as pd
 
-dataset = pd.read_csv('../data/fullData.csv')
+dataset = pd.read_csv('../../data/fullData.csv')
 dataset = dataset.sample(frac=1).reset_index(drop=True)
 dataset['output'] = round(100 * dataset['movement_the_day_after'] / dataset['Close'])
 # dataset['message'].apply(lambda x: len(x.split(' '))>1)
