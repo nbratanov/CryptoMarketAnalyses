@@ -6,8 +6,8 @@ if __name__ == '__main__':
     # generate_crypto_coin_model('../data/cryptoInfo/coin_Ethereum.csv', '../data/ethereum-data.csv', Utils.ETHEREUM_NAMES)
     # generate_crypto_coin_model('../data/cryptoInfo/coin_Bitcoin.csv', '../data/bitcoin-data.csv', Utils.ETHEREUM_NAMES)
 
-    # column_to_predict = 'Close'
-    # predict('../data/cryptoInfo/coin_Bitcoin.csv', column_to_predict, 0.1)
+    column_to_predict = 'Close'
+    predict('../data/cryptoInfo/coin_Bitcoin.csv', column_to_predict, 0.1)
     # predict('../data/cryptoInfo/coin_Ethereum.csv', column_to_predict, 0.1)
     # predict('../data/cryptoInfo/coin_Bitcoin.csv', column_to_predict_2, 0.1)
 
@@ -24,6 +24,7 @@ if __name__ == '__main__':
 
     # test_classification('../data/mergedData.csv')
     # test_classification_predictions('../data/mergedData.csv')
-    test_classification_predictions('../data/mergedData-boyan.csv')
+    # test_classification_predictions('../data/bitcoin-data.csv')
+    # test_classification_predictions('../data/ethereum-data.csv')
 
 
