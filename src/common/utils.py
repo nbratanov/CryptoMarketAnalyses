@@ -50,7 +50,7 @@ class Utils:
         text = Utils.clean_text(text, False)
 
         stemmer = PorterStemmer()
-        # lemmatizer = WordNetLemmatizer()
+        lemmatizer = WordNetLemmatizer()
         stop_words = stopwords.words('english')
         normalized_text = ""
         tokenizer = TweetTokenizer()
@@ -58,9 +58,9 @@ class Utils:
         i = 0
         for word in tokenized_text:
             if word not in stop_words:
-                # lemmatized_word = lemmatizer.lemmatize(word)
-                # normalized_word = stemmer.stem(lemmatized_word.lower())
-                normalized_word = stemmer.stem(word.lower())
+                lemmatized_word = lemmatizer.lemmatize(word)
+                normalized_word = stemmer.stem(lemmatized_word.lower())
+                # normalized_word = stemmer.stem(word.lower())
                 normalized_text += normalized_word + (" " if i < len(tokenized_text) else "")
             i += 1
 
