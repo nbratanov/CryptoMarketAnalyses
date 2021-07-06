@@ -47,7 +47,7 @@ def predict(coin_information_path, column_to_predict, test_percentage):
         print("Score of '" + model[0] + "' based on prediction is: " + str(score))
         print("Accuracy is: " + str(accuracy) + "%")
 
-        visualize(dataframe, predictions, number_of_predictions, column_to_predict)
+        visualize(dataframe, predictions, number_of_predictions, column_to_predict, model[0])
 
 
 def calculate_average_accuracy(predicted_data, test_data):
@@ -57,12 +57,12 @@ def calculate_average_accuracy(predicted_data, test_data):
     return accuracy_sum / len(test_data)
 
 
-def visualize(dataframe, predictions, number_of_predictions, column_to_predict):
+def visualize(dataframe, predictions, number_of_predictions, column_to_predict, model_name):
     dataframe['Date'] = pd.to_datetime(dataframe['Date'])
     plt.figure()
     plt.plot(dataframe['Date'], dataframe[column_to_predict])
     last = dataframe['Date'].iloc[-number_of_predictions:]
     plt.plot(last, predictions)
-    plt.xlabel('Date')
+    plt.xlabel('                            Date:                                   ' + model_name)
     plt.ylabel(column_to_predict)
     plt.show()

@@ -10,7 +10,6 @@ from src.common.utils import Utils
 
 
 def build_classified_data(data):
-    print("Building classes out of data")
     normalized_data = Utils.normalize_data(data)
 
     message = np.array(normalized_data['message'])
@@ -18,7 +17,6 @@ def build_classified_data(data):
     for i in range(len(normalized_data)):
         increase = 100 * float(normalized_data.loc[i, 'movement_the_day_after']) / float(normalized_data.loc[i, 'Close'])
         price_increase.append(increase)
-    print("Collected evaluating the percentage of price increase in a day")
 
     classified_data = []
     for i in range(len(normalized_data)):
@@ -32,7 +30,6 @@ def build_classified_data(data):
             classified_data.append({"class": "profit", "message": message[i]})
         if price_increase[i] > 5:
             classified_data.append({"class": "huge_profit", "message": message[i]})
-    print("Training data was created")
 
     return classified_data
 
@@ -46,17 +43,17 @@ def classify_unique_words(training_data):
         class_words[c] = []
 
     for data in training_data:
-        for word in nltk.word_tokenize(data['message']):
-            if word not in ["?", "'s", ".", ","]:
-                if word not in corpus_words:
-                    corpus_words[word] = 1
-                else:
-                    corpus_words[word] += 1
+        split_message = nltk.word_tokenize(data['message']) if type(data['message']) == str else None
+        if split_message:
+            for word in split_message:
+                if word not in ["?", "'s", ".", ","]:
+                    if word not in corpus_words:
+                        corpus_words[word] = 1
+                    else:
+                        corpus_words[word] += 1
 
-                class_words[data['class']].extend([word])
+                    class_words[data['class']].extend([word])
 
-    # print("Corpus words and counts: " + corpus_words)
-    # print("Class words: " + class_words)
     return class_words, corpus_words
 
 
@@ -146,21 +143,12 @@ def test_classification(data_path):
     data = build_classified_data(data)
     class_words, corpus_words = classify_unique_words(data)
 
-    msg = "Bitcoin just went up. Invest"
-    # calculate_class_score(msg, class_words, "neutral")
-    # find_highest_class_score(msg, class_words)
-    # calculate_class_score_commonality(msg, class_words, corpus_words)
-    # find_highest_class_score_commonality(msg, class_words, corpus_words)
-
-    print(classify(msg, class_words, corpus_words))
-    print(classify("invest now in bitcoin", class_words, corpus_words))
-    print(classify("BTC is up", class_words, corpus_words))
-    print(classify("btc is awful, right now", class_words, corpus_words))
-    print(classify("you should sell your bitcoin", class_words, corpus_words))
-    print(classify("bitcoin is about to increase", class_words, corpus_words))
-    print(classify("bitcoin is about to rise", class_words, corpus_words))
-    print(classify("bitcoin will rise", class_words, corpus_words))
-    print(classify("selling bitcoin", class_words, corpus_words))
+    result_class, score = classify("you should sell your bitcoin", class_words, corpus_words)
+    print("you should sell your bitcoin -> " + result_class)
+    result_class, score = classify("invest in bitcoin", class_words, corpus_words)
+    print("invest in bitcoin -> " + result_class)
+    result_class, score = classify("bitcoin will collapse", class_words, corpus_words)
+    print("bitcoin will collapse -> " + result_class)
 
 
 def test_classification_predictions(data_path):

@@ -7,11 +7,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import pandas as pd
 
-dataset = pd.read_csv('../../data/fullData_normalized.csv')
-print(len(dataset))
+# dataset = pd.read_csv('../../data/fullData.csv')
 #dataset = dataset[dataset['date'].apply(lambda x:  pd.to_datetime(x) > pd.to_datetime('2019-01-01 00:00:00+00:00'))]
 #print(len(dataset))
-
+#dataset = dataset.iloc[::-1].reset_index()
 dataset = dataset.sample(frac=1).reset_index(drop=True)
 #dataset['message'].apply(lambda x: len(x.split(' '))>1)
 dataset['output'] = 100 * dataset['movement_the_day_after'] / dataset['Close']
@@ -173,8 +172,8 @@ def check_knn_accuracy():
 
     print(num_correct/num_all)
 
-def demo_knn():
-    train_corpus = dataset
+def demo_knn(data_path):
+    train_corpus = pd.read_csv(data_path)
     X_train = train_corpus['message']
     y_train = train_corpus['output']
 
