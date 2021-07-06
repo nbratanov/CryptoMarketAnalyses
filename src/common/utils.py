@@ -37,6 +37,7 @@ class Utils:
         cleaned_text = re.sub(r'\'', '', cleaned_text)
         cleaned_text = re.sub(r'\"', '', cleaned_text)
         cleaned_text = re.sub(r'\.([A-Za-z]{1})', r'. \1', cleaned_text)
+        #cleaned_text = re.sub(r'https\:.* ', ' ', cleaned_text)
 
         if should_remove_signs:
             cleaned_text = re.sub(r'\?', ' ', cleaned_text)
