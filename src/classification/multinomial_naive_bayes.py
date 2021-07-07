@@ -10,7 +10,8 @@ from src.common.utils import Utils
 
 
 def build_classified_data(data):
-    normalized_data = Utils.normalize_data(data)
+    # normalized_data = Utils.normalize_data(data) - do not use if your data is already normalized
+    normalized_data = data
 
     message = np.array(normalized_data['message'])
     price_increase = []
