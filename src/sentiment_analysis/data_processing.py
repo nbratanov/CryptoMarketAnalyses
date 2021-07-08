@@ -18,8 +18,8 @@ def get_data(path, train_data_percentage, max_message_length, seed):
     fields = [('id', None), ('text', text), ('label', label)]
     training_data, test_data = data.TabularDataset.splits(
         path=path,
-        train='./sentiment_analysis/training_data.csv',
-        test='./sentiment_analysis/test_data.csv',
+        train='./sentiment_analysis/training_data-full-btc.csv',
+        test='./sentiment_analysis/test_data-full-btc.csv',
         format='csv',
         fields=fields,
         skip_header=True

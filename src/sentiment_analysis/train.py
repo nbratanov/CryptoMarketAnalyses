@@ -50,7 +50,7 @@ def evaluate(cnn_model, iterator, criterion):
 
             predictions = cnn_model(text, text_lengths).squeeze(1)
             loss = criterion(predictions, batch.label)
-            acc = acc(predictions, batch.label)
+            acc = accuracy(predictions, batch.label)
 
             epoch_loss += loss.item()
             epoch_acc += acc.item()
