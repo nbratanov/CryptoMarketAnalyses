@@ -32,11 +32,17 @@ class Utils:
         cleaned_text = re.sub(r';', '', cleaned_text)
         cleaned_text = re.sub(r'_', '', cleaned_text)
         cleaned_text = re.sub(r'\\', ' ', cleaned_text)
+        cleaned_text = re.sub(r'\$', '', cleaned_text)
+        cleaned_text = re.sub(r'\~', '', cleaned_text)
+        cleaned_text = re.sub(r'\*', '', cleaned_text)
+        cleaned_text = re.sub(r'\"', '', cleaned_text)
+        cleaned_text = re.sub(r'\%', '', cleaned_text)
+        cleaned_text = re.sub(r' [A-Za-z]{1}', ' ', cleaned_text)
         cleaned_text = re.sub(r'-', ' ', cleaned_text)
         cleaned_text = re.sub(r'/', ' ', cleaned_text)
         cleaned_text = re.sub(r'\'', '', cleaned_text)
         cleaned_text = re.sub(r'\"', '', cleaned_text)
-        cleaned_text = re.sub(r'\.([A-Za-z]{1})', r'. \1', cleaned_text)
+        #cleaned_text = re.sub(r'\.([A-Za-z]{1})', r'. \1', cleaned_text)
         #cleaned_text = re.sub(r'https\:.* ', ' ', cleaned_text)
 
         if should_remove_signs:
@@ -88,3 +94,19 @@ class Utils:
                 normalized_data.append(normalized)
 
         return normalized_data
+
+    @staticmethod
+    def get_class(percent):
+        result = 0
+        if (percent < -5):
+            result = 0
+        elif percent < -1 and percent >= -5:
+            result = 1
+        elif percent >= -1 and percent <= 1:
+            result = 2
+        elif percent > 1 and percent <= 5:
+            result = 3
+        elif percent > 5:
+            result = 4
+
+        return result

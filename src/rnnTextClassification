@@ -11,34 +11,19 @@ import torch.nn.functional as F
 import string
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 from sklearn.metrics import mean_squared_error
-from nltk.tokenize import TweetTokenizer
-from sklearn.feature_extraction.text import TfidfVectorizer
 import time
+from src.common.utils import Utils
 
 
-
-dataset = pd.read_csv("../data/fullData_normalized_withoutLinks.csv")
+dataset = pd.read_csv("../data/mergedData.csv")
+#dataset = dataset.drop_duplicates(subset='message', keep="last")
+#dataset = dataset[dataset['date'].apply(lambda x:  pd.to_datetime(x) > pd.to_datetime('2019-01-01 00:00:00+00:00'))]
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-def get_class(percent):
-    result = 0
-    if percent >= -1 and percent <= 1:
-        result = 0
-    elif percent > 1 and percent <= 5:
-        result = 1
-    elif percent > 5:
-        result = 2
-    elif percent < -1 and percent >= -5:
-        result = 3
-    elif percent < -5:
-         result = 4
-
-    return result
 
 dataset = dataset[['message', 'movement_the_day_after', 'Close']]
 dataset.columns = ['message', 'movement_the_day_after', 'close']
 dataset['output'] = 100 * dataset['movement_the_day_after'] / dataset['close']
-dataset['output'] = dataset['output'].apply(lambda x: get_class(x))
+dataset['output'] = dataset['output'].apply(lambda x: Utils.get_class(x))
 dataset['message_length'] = dataset['message'].apply(lambda x: len(x.split()))
 
 #tokenization
@@ -72,7 +57,7 @@ for word in counts:
     vocab2index[word] = len(words)
     words.append(word)
 
-def get_encoded_sentence(text, vocab2index, N=70):
+def get_encoded_sentence(text, vocab2index, N=35):
     tokenized_sentence = tokenize(text)
     encoded = np.zeros(N, dtype=int)
     enc1 = np.array([vocab2index.get(word, vocab2index["UNK"]) for word in tokenized_sentence])
@@ -85,8 +70,8 @@ dataset['encoded'] = dataset['message'].apply(lambda x: np.array(get_encoded_sen
 X = list(dataset['encoded'])
 y = list(dataset['output'])
 
-X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.1)
-#X_train, X_valid, y_train, y_valid = train_test_split(X_train_all, y_train_all, test_size=0.1)
+X_train_all, X_test, y_train_all, y_test = train_test_split(X, y, test_size=0.1, shuffle=True)
+X_train, X_valid, y_train, y_valid = train_test_split(X_train_all, y_train_all, test_size=0.1)
 
 
 
@@ -104,13 +89,14 @@ class Dataset(Dataset):
 
 train_data = Dataset(X_train, y_train)
 validation_data = Dataset(X_valid, y_valid)
-#test_ds = Dataset(X_test, y_test)
+test_data = Dataset(X_test, y_test)
 
 
-def train_model(model, epochs=10, lr=0.001):
+def train_model(model, epochs=10, lr=0.05):
     parameters = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = torch.optim.Adam(parameters, lr=lr)
     temp_best_acc = 0
+
     for i in range(epochs):
         tic = time.perf_counter()
         model.train()
@@ -120,7 +106,6 @@ def train_model(model, epochs=10, lr=0.001):
             x = x.long()
             y = y.long()
             y_pred = model(x, l)
-            #print(y_pred)
             optimizer.zero_grad()
             loss = F.cross_entropy(y_pred, y)
             loss.backward()
@@ -128,11 +113,11 @@ def train_model(model, epochs=10, lr=0.001):
             sum_loss += loss.item() * y.shape[0]
             total += y.shape[0]
         val_loss, val_acc, val_rmse = validation_metrics(model, val_dl)
-        #if i % 5 == 1:
         print("train loss %.3f, val loss %.3f, val accuracy %.3f, and val rmse %.3f" % (
         sum_loss / total, val_loss, val_acc, val_rmse))
         toc = time.perf_counter()
         print(f"The operation took {toc - tic:0.4f} seconds")
+
         if val_acc > temp_best_acc:
             torch.save({
                 'epoch': i,
@@ -160,7 +145,6 @@ def validation_metrics(model, valid_dl):
         y_hat = model(x, l)
         loss = F.cross_entropy(y_hat, y)
         pred = torch.max(y_hat, 1)[1]
-        #print(pred)
         correct += (pred == y).float().sum()
         total += y.shape[0]
         sum_loss += loss.item() * y.shape[0]
@@ -172,13 +156,14 @@ batch_size = 5000
 vocab_size = len(words)
 train_dl = DataLoader(train_data, batch_size=batch_size, shuffle=True)
 val_dl = DataLoader(validation_data, batch_size=batch_size)
+test_dl = DataLoader(test_data, batch_size=batch_size)
 
 
-class LSTM_variable_input(torch.nn.Module):
+class LSTM(torch.nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super().__init__()
         self.hidden_dim = hidden_dim
-        self.dropout = nn.Dropout(0.2)
+        self.dropout = nn.Dropout(0.3)
         self.embeddings = nn.Embedding(vocab_size, embedding_dim, padding_idx=0).to(device)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True).to(device)
         self.linear = nn.Linear(hidden_dim, 5).to(device)
@@ -191,28 +176,26 @@ class LSTM_variable_input(torch.nn.Module):
         out = self.linear(ht[-1])
         return out
 
-# def check_accuracy(model):
-#     num_correct = 0
-#     num_samples = 0
-#     model.eval()
-#
-#     with torch.no_grad():
-#         for x, y, l in test_ds:
-#             scores = model(X_test, l)
-#             prediction = torch.max(y_hat, 0)[1]
-#             num_correct += (predictions == y_test).sum()
-#             num_samples += predictions.size(0)
-#
-#             print(f'got {num_correct} / {num_samples} with accuracy {float(num_correct)/float(num_samples)*100:.2f}')
-#
-#     model.train()
+def check_accuracy(model):
+    num_correct = 0
+    num_samples = 0
+    model.eval()
+
+    with torch.no_grad():
+        for x, y, l in test_dl:
+            x = x.long()
+            y = y.long()
+            y_pred = model(x, l)
+            predictions = torch.max(y_pred, 1)[1]
+            num_correct += (predictions == y).sum().float()
+            num_samples += predictions.size(0)
+
+        print(f'got {num_correct} / {num_samples} with accuracy {float(num_correct)/float(num_samples)*100:.2f}')
 
 # model = LSTM_glove_vecs(vocab_size, 50, 50, pretrained_weights)
 # train_model(model, epochs=30, lr=0.1)
-model = LSTM_variable_input(vocab_size, 30, 60).to(device)
-#model = torch.load('../models/lstm_model.pt')
-train_model(model, epochs=400, lr=0.05)
+model = LSTM(vocab_size, 60, 128).to(device)
+#model = torch.load('../models/lstm_model.pt'256)
+train_model(model, epochs=20, lr=0.05)
 
-
-
-# check_accuracy(model)
+check_accuracy(model)

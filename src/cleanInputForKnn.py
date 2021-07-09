@@ -30,7 +30,7 @@ def replace_bitcoin_mentions(message):
 
 dataset = dataset[dataset['message'].apply(lambda x: len(x.split(' ')) > 2)]
 dataset = dataset[~dataset['message'].apply(lambda x: 'https' in x)]
-dataset['message'] = dataset['message'].apply(lambda x: Utils.clean_text(x, False))
+dataset['message'] = dataset['message'].apply(lambda x: Utils.clean_text(x, True))
 dataset['message'] = dataset['message'].apply(lambda x: replace_bitcoin_mentions(x))
 dataset['message'] = dataset['message'].apply(lambda x: Utils.normalize_text(x))
 

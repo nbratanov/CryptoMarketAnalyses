@@ -22,22 +22,6 @@ print(np.min(dataset['movement_the_day_after']))
 dataset['output'] = round(dataset['movement_the_day_after'] / 1000)
 #dataset = dataset.sample(frac=1).reset_index(drop=True)
 
-def get_class(percent):
-    result = 0
-    if percent >= -1 and percent <= 1:
-        result = 'neutral'
-    elif percent > 1 and percent <= 4:
-        result = 'profit'
-    elif percent > 4:
-        result = 'huge_profit'
-    elif percent < -1 and percent >= -4:
-        result = 'loss'
-    elif percent < -4:
-        result = 'huge_loss'
-
-    return result
-
-
 class KNN_NLC_Classifer():
     def __init__(self, k = 1, distance_type = 'path'):
         self.k = k

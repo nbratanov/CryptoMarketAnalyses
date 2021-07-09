@@ -2,42 +2,15 @@ import nltk
 import time
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-
 import numpy as np
 import pandas as pd
+from src.common.utils import Utils
 
-# dataset = pd.read_csv('../../data/fullData.csv')
-#dataset = dataset[dataset['date'].apply(lambda x:  pd.to_datetime(x) > pd.to_datetime('2019-01-01 00:00:00+00:00'))]
-#print(len(dataset))
-#dataset = dataset.iloc[::-1].reset_index()
+dataset = pd.read_csv('../../data/fullData.csv')
+dataset = dataset[dataset['date'].apply(lambda x:  pd.to_datetime(x) > pd.to_datetime('2019-01-01 00:00:00+00:00'))]
 dataset = dataset.sample(frac=1).reset_index(drop=True)
 #dataset['message'].apply(lambda x: len(x.split(' '))>1)
 dataset['output'] = 100 * dataset['movement_the_day_after'] / dataset['Close']
-
-
-
-
-def get_class(percent):
-    result = 0
-    if percent >= -1 and percent <= 1:
-        result = 'neutral'
-    elif percent > 1 and percent <= 5:
-        result = 'profit'
-    elif percent > 5:
-        result = 'huge_profit'
-    elif percent < -1 and percent >= -5:
-        result = 'loss'
-    elif percent < -5:
-        result = 'huge_loss'
-
-    # if percent >= 0:
-    #     result = 'profit'
-    # elif percent < 0:
-    #     result = 'loss'
-
-    return result
-
 
 class KNN_NLC_Classifer():
     def __init__(self, k, train_size):
@@ -65,10 +38,6 @@ class KNN_NLC_Classifer():
 
         result['temp_index'] = start_index + result_idx
         return result
-
-    # def get_alt_similarity(document, start_index, end_index):
-    #     nlp(u'Hello hi there!')
-
 
     def predict(self, x_test, y_test, use_mean):
         self.x_test = x_test
@@ -114,16 +83,16 @@ class KNN_NLC_Classifer():
             temp_sum = 0
             pred_array = []
             for index in range(len(pred_result)):
-                #pred_result.loc[index] = get_class(round(y_train[pred_result[index][1]]))
+                #pred_result.loc[index] = Utils.get_class(round(y_train[pred_result[index][1]]))
                 # print(y_train[pred_result[index][1]])
                 temp_sum += self.y_train[pred_result[index][1]]
-                pred_array.append(get_class(self.y_train[pred_result[index][1]]))
+                pred_array.append(Utils.get_class(self.y_train[pred_result[index][1]]))
             #prediction = max(set(pred_result), key=pred_result.count)
 
             if self.use_mean:
                 value = temp_sum/len(pred_result)
                 print(value)
-                prediction = get_class(value)
+                prediction = Utils.get_class(value)
             else:
                 prediction = max(set(pred_array), key=pred_array.count)
 
@@ -139,7 +108,7 @@ class KNN_NLC_Classifer():
 
             #print(self.x_train.head())
             print(y_test.loc[self.train_size + i + 1])
-            print(prediction == get_class(y_test.loc[self.train_size + i + 1]))
+            print(prediction == Utils.get_class(y_test.loc[self.train_size + i + 1]))
 
             toc = time.perf_counter()
             print(f"The operation took {toc - tic:0.4f} seconds")
@@ -156,7 +125,6 @@ def check_knn_accuracy():
 
     X_train = train_corpus['message']
     y_train = train_corpus['output']
-)
 
     classifier = KNN_NLC_Classifer(9, train_size)
     classifier.fit(X_train, y_train)
@@ -167,7 +135,7 @@ def check_knn_accuracy():
     num_correct = 0
 
     for j in range(len(y_pred_final)):
-        if y_pred_final[j] == get_class(test_corpus.loc[train_size + j + 1, 'output']):
+        if y_pred_final[j] == Utils.get_class(test_corpus.loc[train_size + j + 1, 'output']):
             num_correct += 1
 
     print(num_correct/num_all)
