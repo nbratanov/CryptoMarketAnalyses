@@ -9,7 +9,7 @@ class Utils:
     ETHEREUM_NAMES = ['ETH', 'eth', 'Eth', 'Ethereum', 'ETHEREUM', 'ethereum', 'ETHEREU']
 
     @staticmethod
-    def clean_text(text, should_remove_signs):
+    def clean_text(text, should_remove_signs=False):
         # Remove Unicode
         cleaned_text = re.sub(r'[^\x00-\x7F]+', ' ', text)
         # Remove Mentions
@@ -49,6 +49,14 @@ class Utils:
             cleaned_text = re.sub(r'\?', ' ', cleaned_text)
             cleaned_text = re.sub(r'\.', ' ', cleaned_text)
             cleaned_text = re.sub(r'!', ' ', cleaned_text)
+
+        return cleaned_text
+
+    @staticmethod
+    def clean_tokenized_text(tokens):
+        cleaned_text = []
+        for token in tokens:
+            cleaned_text.append(Utils.clean_text(token, False))
 
         return cleaned_text
 
