@@ -40,7 +40,7 @@ class KNN_NLC_Classifer():
         result['temp_index'] = start_index + result_idx
         return result
 
-    def predict(self, x_test):
+    def predict(self, x_test, use_mean):
         self.x_test = x_test
         y_predict = []
 
@@ -65,7 +65,7 @@ class KNN_NLC_Classifer():
                         if sim_obj['temp_sim'] > max_sim:
                             max_similarities.append(sim_obj['temp_sim'])
                             max_indexes.append(sim_obj['temp_index'])
-                            max_indexes = sorted(zip(max_similarities, max_indexes), reverse=True)[:self.k]
+                            pred_result = sorted(zip(max_similarities, max_indexes), reverse=True)[:self.k]
                         j = self.x_train.shape[0]
                     else:
                         document = self.x_test[i + self.train_size + 1]
@@ -78,30 +78,22 @@ class KNN_NLC_Classifer():
                         j += step
 
             temp_sum = 0
+            pred_array = []
             for index in range(len(pred_result)):
-                #pred_result.loc[index] = Utils.get_class(round(y_train[pred_result[index][1]]))
-                # print(y_train[pred_result[index][1]])
+                #pred_result.loc[index] = Utils.get_class(round(self.y_train[pred_result[index][1]]))
+                print(self.y_train[pred_result[index][1]])
                 temp_sum += self.y_train[pred_result[index][1]]
                 pred_array.append(Utils.get_class(self.y_train[pred_result[index][1]]))
             #prediction = max(set(pred_result), key=pred_result.count)
 
-            if self.use_mean:
+            if use_mean:
                 value = temp_sum/len(pred_result)
                 print(value)
                 prediction = Utils.get_class(value)
             else:
                 prediction = max(set(pred_array), key=pred_array.count)
 
-
-            prediction = get_class(value)
             y_predict.append(prediction)
-            print(prediction)
-            print(value)
-            #print(get_class(self.x_test.loc[self.train_size + i + 1, 'output']))
-
-            #print(self.x_train.head())
-            print(y_test.loc[self.train_size + i + 1])
-            print(prediction == Utils.get_class(y_test.loc[self.train_size + i + 1]))
 
             toc = time.perf_counter()
             print(f"The operation took {toc - tic:0.4f} seconds")
@@ -122,13 +114,13 @@ def check_knn_accuracy(data_path):
     y_train = train_corpus['output']
 
 
-    classifier = KNN_NLC_Classifer(3, train_size)
+    classifier = KNN_NLC_Classifer(3, train_size, dataset)
 
     classifier.fit(X_train, y_train)
 
     print(test_corpus.head())
 
-    y_pred_final = classifier.predict(test_corpus['message'])
+    y_pred_final = classifier.predict(test_corpus['message'], False)
 
     num_all = len(test_corpus)
     num_correct = 0
@@ -157,10 +149,12 @@ def demo_knn(data_path):
 
     print("Print for k=1 nearest neighbours")
     classifier.fit(X_train, y_train)
-    classifier.predict(test_corpus)
+    classifier.predict(test_corpus, False)
     print("\n")
 
     print("Print for k=5 nearest neighbours")
     classifier2.fit(X_train, y_train)
-    classifier2.predict(test_corpus)
+    classifier2.predict(test_corpus, False)
     print("\n")
+
+check_knn_accuracy('../../data/data/bitcoin-data.csv')
